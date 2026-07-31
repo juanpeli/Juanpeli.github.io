@@ -1,312 +1,263 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador Premium - Los Simpson</title>
+    <!-- Fuente moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
 
-<title>Visualizador de Videos</title>
+    <style>
+        :root {
+            --primary-color: #e50914; /* Rojo estilo Netflix */
+            --bg-color: #000;
+            --card-bg: #141414;
+            --text-color: #fff;
+            --transition: all 0.3s ease;
+        }
 
-<style>
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-body {
-    background-color: #000;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        /* Pantalla de Bloqueo Mejorada */
+        #pantalla-bloqueo {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, #222 0%, #000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
 
+        .modal-bloqueo {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 50px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+        }
 
-h1 {
-    color: red;
-    text-align: center;
-    text-transform: uppercase;
-}
+        .modal-bloqueo h2 {
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
 
+        .modal-bloqueo input {
+            padding: 15px;
+            font-size: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            background: #333;
+            color: white;
+            border: none;
+            border-bottom: 3px solid transparent;
+            text-align: center;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
 
-#pantalla-bloqueo {
-    position: fixed;
-    inset: 0;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
+        .modal-bloqueo input:focus {
+            outline: none;
+            border-bottom-color: var(--primary-color);
+            background: #444;
+        }
 
+        /* Botones */
+        button {
+            margin-top: 25px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            width: 100%;
+            text-transform: uppercase;
+            transition: var(--transition);
+        }
 
-.modal-bloqueo {
-    background: #111;
-    padding: 40px;
-    border: 2px solid red;
-    border-radius: 10px;
-    text-align: center;
-}
+        button:hover {
+            background: #f40612;
+            transform: translateY(-2px);
+        }
 
+        #mensaje-error {
+            color: var(--primary-color);
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
 
-.modal-bloqueo input {
-    padding: 12px;
-    font-size: 18px;
-    width: 80%;
-    background: black;
-    color: white;
-    border: 1px solid red;
-    text-align: center;
-}
+        /* Contenido Principal */
+        #contenido-principal {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px 20px;
+        }
 
+        h1 {
+            color: var(--primary-color);
+            font-size: 3rem;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
 
-button {
-    margin-top: 20px;
-    background: red;
-    color:white;
-    border:none;
-    padding:12px 25px;
-    cursor:pointer;
-    border-radius:5px;
-    font-weight:bold;
-}
+        .video-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            width: 100%;
+        }
 
+        .video-box {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+            border: 1px solid #333;
+        }
 
-#mensaje-error {
-    color:red;
-    display:none;
-}
+        .video-box:hover {
+            transform: scale(1.03);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 25px rgba(229, 9, 20, 0.2);
+            z-index: 10;
+        }
 
+        iframe {
+            width: 100%;
+            aspect-ratio: 16 / 9; /* Mantiene la proporción correcta automáticamente */
+            border: none;
+            display: block;
+        }
 
-#contenido-principal {
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    width:100%;
-}
+        .video-label {
+            padding: 15px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        }
 
-
-.video-container {
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:30px;
-    width:100%;
-}
-
-
-.video-box {
-    width:380px;
-    background:#111;
-    border:2px solid red;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-
-iframe {
-    width:100%;
-    height:250px;
-    display:block;
-}
-
-
-.video-label {
-    padding:15px;
-    text-align:center;
-    font-size:18px;
-    font-weight:bold;
-}
-
-
-</style>
-
+        /* Botón salir */
+        .btn-salir {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: auto;
+            padding: 8px 15px;
+            font-size: 12px;
+            background: #333;
+        }
+    </style>
 </head>
-
-
 <body>
 
-
-<div id="pantalla-bloqueo">
-
-<div class="modal-bloqueo">
-
-<h2>Acceso Protegido</h2>
-
-<input type="password" id="input-pass" placeholder="Ingresa el PIN">
-
-<br>
-
-<button onclick="verificarContrasena()">
-Entrar
-</button>
-
-
-<p id="mensaje-error">
-PIN incorrecto
-</p>
-
-
-</div>
-
-</div>
-
-
-
-
-<div id="contenido-principal">
-
-
-<h1>
-THE SIMPSon
-</h1>
-
-
-
-<div class="video-container">
-
-
-
-<div class="video-box">
-
-<IFRAME SRC="https://fastream.to/embed-ahpw7zcwv1oc.html" FRAMEBORDER=0 MARGINWIDTH=0 
-MARGINHEIGHT=0 SCROLLING=NO WIDTH=640 HEIGHT=360 allowfullscreen></IFRAME>
-
-<div class="video-label">
-LOS SIMPSON LA PELICULA
-</div>
-
-</div>
-
-
-
-
-<div class="video-box">
-
-<IFRAME SRC="https://fastream.to/embed-flx8u0hzsc2h.html" FRAMEBORDER=0 MARGINWIDTH=0
- MARGINHEIGHT=0 SCROLLING=NO WIDTH=640 HEIGHT=360 allowfullscreen></IFRAME>
-<div class="video-label">
-Los Simpson T3 E17 LAT
-</div>
-
-</div>
-
-
-
-
-
-<div class="video-box">
-
-<IFRAME SRC="https://fastream.to/embed-xhsnq8co8sqq.html" FRAMEBORDER=0 
-MARGINWIDTH=0 MARGINHEIGHT=0 SCROLLING=NO WIDTH=640 HEIGHT=360 allowfullscreen></IFRAME>
-
-<div class="video-label">
-Los Simpson T8 E02 LAT
-</div>
-
-</div>
-
-
-
-
-
-
-<div class="video-box">
-
-<IFRAME SRC="https://fastream.to/embed-qs8w0zuodjub.html" FRAMEBORDER=0 MARGINWIDTH=0 
-MARGINHEIGHT=0 SCROLLING=NO WIDTH=640 HEIGHT=360 allowfullscreen></IFRAME>
-
-<div class="video-label">
-Battleship
-</div>
-
-</div>
-
-
-
-
-
-
-<div class="video-box">
-
-<IFRAME SRC="https://fastream.to/embed-05g8bk4kyy3c.html" FRAMEBORDER=0 MARGINWIDTH=0
- MARGINHEIGHT=0 SCROLLING=NO WIDTH=640 HEIGHT=360 allowfullscreen></IFRAME>
-
-<div class="video-label">
-Troll
-</div>
-
-</div>
-
-
-
-
-
-
-<div class="video-box">
-
-<IFRAME SRC="https://fastream.to/embed-7qxbx47oadf5.html" FRAMEBORDER=0 MARGINWIDTH=0
-MARGINHEIGHT=0 SCROLLING=NO WIDTH=640 HEIGHT=360 allowfullscreen></IFRAME>
-
-<div class="video-label">
-Los Simpson T25 E20 LAT LEGO
-</div>
-
-</div>
-
-
-
-
-</div>
-
-
-</div>
-
-
-
-<script>
-
-
-function verificarContrasena(){
-
-let input = document.getElementById("input-pass").value;
-
-
-if(input === "4455"){
-
-document.getElementById("pantalla-bloqueo").style.display="none";
-
-document.getElementById("contenido-principal").style.display="flex";
-
-
-}else{
-
-
-document.getElementById("mensaje-error").style.display="block";
-
-document.getElementById("input-pass").value="";
-
-
-}
-
-
-}
-
-
-
-document.getElementById("input-pass")
-.addEventListener("keypress",function(e){
-
-if(e.key==="Enter"){
-
-verificarContrasena();
-
-}
-
-});
-
-
-</script>
-
-
-
+    <!-- Pantalla de Bloqueo -->
+    <div id="pantalla-bloqueo">
+        <div class="modal-bloqueo">
+            <h2>Acceso Protegido</h2>
+            <input type="password" id="input-pass" placeholder="Ingresa el PIN" maxlength="4">
+            <p id="mensaje-error">PIN incorrecto. Intenta de nuevo.</p>
+            <button onclick="verificarContrasena()">Entrar</button>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div id="contenido-principal">
+        <button class="btn-salir" onclick="cerrarSesion()">Cerrar Sesión</button>
+        
+        <h1>THE SIMPSONS</h1>
+
+        <div class="video-container">
+            <!-- Video 1 -->
+            <div class="video-box">
+                <iframe src="https://fastream.to/embed-ahpw7zcwv1oc.html" allowfullscreen></iframe>
+                <div class="video-label">Los Simpson: La Película</div>
+            </div>
+
+            <!-- Video 2 -->
+            <div class="video-box">
+                <iframe src="https://fastream.to/embed-flx8u0hzsc2h.html" allowfullscreen></iframe>
+                <div class="video-label">T3 E17 - Latino</div>
+            </div>
+
+            <!-- Video 3 -->
+            <div class="video-box">
+                <iframe src="https://fastream.to/embed-xhsnq8co8sqq.html" allowfullscreen></iframe>
+                <div class="video-label">T8 E02 - Latino</div>
+            </div>
+
+            <!-- Video 4 -->
+            <div class="video-box">
+                <iframe src="https://fastream.to/embed-qs8w0zuodjub.html" allowfullscreen></iframe>
+                <div class="video-label">Battleship</div>
+            </div>
+
+            <!-- Video 5 -->
+            <div class="video-box">
+                <iframe src="https://fastream.to/embed-05g8bk4kyy3c.html" allowfullscreen></iframe>
+                <div class="video-label">Troll</div>
+            </div>
+
+            <!-- Video 6 -->
+            <div class="video-box">
+                <iframe src="https://fastream.to/embed-7qxbx47oadf5.html" allowfullscreen></iframe>
+                <div class="video-label">T25 E20 - LEGO</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PIN_CORRECTO = "4455";
+
+        function verificarContrasena() {
+            const input = document.getElementById("input-pass").value;
+            const pantalla = document.getElementById("pantalla-bloqueo");
+            const contenido = document.getElementById("contenido-principal");
+            const error = document.getElementById("mensaje-error");
+
+            if (input === PIN_CORRECTO) {
+                pantalla.style.opacity = "0";
+                setTimeout(() => {
+                    pantalla.style.display = "none";
+                    contenido.style.display = "flex";
+                }, 500);
+            } else {
+                error.style.display = "block";
+                document.getElementById("input-pass").value = "";
+                document.getElementById("input-pass").focus();
+            }
+        }
+
+        function cerrarSesion() {
+            location.reload(); // Forma rápida de resetear el estado
+        }
+
+        // Detectar tecla Enter
+        document.getElementById("input-pass").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") verificarContrasena();
+        });
+    </script>
 </body>
 </html>
